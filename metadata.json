@@ -1,0 +1,7 @@
+{
+  "name": "Barber Pro  Gemini AI",
+  "description": "An advanced web application for booking appointments with professional barbers, purchasing premium grooming products, and selling your own supplies. This app features an AI-powered Style Assistant to recommend services and an AI Copywriter to generate compelling product descriptions, all powered by Gemini.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
