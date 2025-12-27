@@ -71,6 +71,35 @@ const requestNotificationPermission = async () => {
     return permission;
 };
 
+// Persistence Helpers
+const SAVE_KEYS = {
+    APPOINTMENTS: 'w8_appointments',
+    SERVICES: 'w8_services',
+    BARBERS: 'w8_barbers',
+    PRODUCTS: 'w8_products',
+    CART: 'w8_cart',
+    PROFILE: 'w8_profile',
+    ADMIN_MODE: 'w8_admin_mode'
+};
+
+const loadLocalData = <T,>(key: string, defaultValue: T): T => {
+    try {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : defaultValue;
+    } catch (e) {
+        console.warn(`Error loading ${key} from storage:`, e);
+        return defaultValue;
+    }
+};
+
+const saveLocalData = (key: string, data: any) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+        console.error(`Error saving ${key} to storage:`, e);
+    }
+};
+
 
 // HEADER COMPONENT
 interface HeaderProps {
@@ -201,7 +230,6 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentPage, onPageChange }) => {
 // PAGES
 const HomePage: React.FC<{ products: Product[]; onPageChange: (page: Page) => void; setModal: (modal: ModalState) => void; isAdmin: boolean; addToCart: (p: Product) => void }> = ({ products, onPageChange, setModal, isAdmin, addToCart }) => (
     <section id="page-inicio" className="p-4 fade-in">
-        {/* HERO BANNER SECTION */}
         <div className="relative h-64 sm:h-96 w-full mb-10 rounded-3xl overflow-hidden shadow-2xl group border border-gray-800">
             <img 
                 src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
@@ -502,7 +530,6 @@ const BarbersPage: React.FC<BarbersPageProps> = ({ barbers, onSelectBarber, sele
 
     }, [barbers, onSelectBarber]);
 
-    // Handle radius circle visualization
     useEffect(() => {
         const map = mapInstanceRef.current;
         if (!map) return;
@@ -523,7 +550,6 @@ const BarbersPage: React.FC<BarbersPageProps> = ({ barbers, onSelectBarber, sele
                 dashArray: '5, 5'
             }).addTo(map);
 
-            // Auto-expand map and zoom to radius
             if (!isMapExpanded) setIsMapExpanded(true);
             map.flyTo([userLocation.lat, userLocation.lng], map.getBoundsZoom(radiusCircleRef.current.getBounds()));
         }
@@ -603,11 +629,6 @@ const BarbersPage: React.FC<BarbersPageProps> = ({ barbers, onSelectBarber, sele
                                 </button>
                             </div>
                         </div>
-                        {userLocation && (
-                            <div className="flex-1 w-full text-xs text-gray-400 pb-2 italic">
-                                * Buscando desde: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-                            </div>
-                        )}
                     </div>
                 </div>
 
@@ -618,7 +639,7 @@ const BarbersPage: React.FC<BarbersPageProps> = ({ barbers, onSelectBarber, sele
                         const distance = userLocation ? getDistance(userLocation.lat, userLocation.lng, barber.location.lat, barber.location.lng).toFixed(1) : null;
                         
                         return (
-                        <div key={barber.id} onClick={() => onSelectBarber(barber)} className={`bg-gray-800 bg-opacity-80 backdrop-blur-sm border rounded-lg p-4 flex items-center space-x-4 shadow-xl transition-all duration-300 cursor-pointer relative group ${isSelected ? 'border-green-400 scale-105 bg-gray-700' : 'border-amber-500 hover:bg-gray-700'}`}>
+                        <div key={barber.id} onClick={() => onSelectBarber(barber)} className={`bg-gray-800 bg-opacity-80 backdrop-blur-sm border rounded-lg p-4 flex items-center space-x-4 shadow-xl transition-all duration-300 cursor-pointer relative group ${isSelected ? 'border-green-400 scale-105 bg-gray-700' : 'border-amber-500 hover:border-amber-400 hover:scale-[1.02] hover:bg-gray-800/90 hover:shadow-2xl hover:shadow-amber-500/10'}`}>
                             {isAdmin && (
                                 <div className="absolute top-2 right-2 z-10">
                                      <button onClick={(e) => { e.stopPropagation(); setModal({type: 'editItem', item: barber, title: 'Editar Barbero'}); }} className="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-full shadow"><i className="fas fa-pencil-alt text-xs"></i></button>
@@ -636,7 +657,7 @@ const BarbersPage: React.FC<BarbersPageProps> = ({ barbers, onSelectBarber, sele
                                 <p className="text-gray-400 text-xs mt-1 flex items-center"><i className={`${levelInfo.icon} mr-1 ${levelInfo.color}`}></i> {barber.professionLevel}</p>
                             </div>
                             <div className="flex flex-col items-center space-y-2">
-                                <button id={`btn-${barber.id}`} onClick={(e) => { e.stopPropagation(); onSelectBarber(barber); }} disabled={!barber.isAvailable && !isAdmin} className="text-xs bg-amber-500 text-gray-900 px-3 py-1 rounded-full hover:bg-amber-400 disabled:bg-gray-600">{isSelected ? 'Ver Perfil' : 'Seleccionar'}</button>
+                                <button onClick={(e) => { e.stopPropagation(); onSelectBarber(barber); }} disabled={!barber.isAvailable && !isAdmin} className="text-xs bg-amber-500 text-gray-900 px-3 py-1 rounded-full hover:bg-amber-400 disabled:bg-gray-600">{isSelected ? 'Ver Perfil' : 'Seleccionar'}</button>
                             </div>
                         </div>
                     )}) : <p className="col-span-2 text-center text-gray-500">No se encontraron barberos con los filtros actuales.</p>}
@@ -767,7 +788,6 @@ const CommercePage: React.FC<CommercePageProps> = ({ products, setModal, isAdmin
                 </div>
             )}
 
-            {/* CART DRAWER */}
             {isCartOpen && (
                 <div className="fixed inset-0 z-50 overflow-hidden">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCartOpen(false)}></div>
@@ -865,7 +885,6 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
                 <i className="fas fa-calendar-alt text-amber-500"></i> Mi Agenda
             </h2>
 
-            {/* TAB SYSTEM */}
             <div className="flex bg-gray-900/50 p-1 rounded-xl mb-6 border border-gray-800">
                 <button 
                     onClick={() => setView('upcoming')} 
@@ -883,7 +902,6 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
 
             {view === 'upcoming' ? (
                 <div className="space-y-6">
-                    {/* CALENDAR PICKER */}
                     <div className="bg-gray-800/40 p-4 rounded-xl border border-gray-700">
                         <label className="block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Filtrar por día</label>
                         <input 
@@ -939,11 +957,11 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
                 <div className="space-y-4">
                     <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest px-2 mb-4">Historial de Servicios</h3>
                     {Object.keys(groupedHistory).length > 0 ? Object.entries(groupedHistory).map(([date, dailyApps]) => {
+                        const apps = dailyApps as Appointment[];
                         const isExpanded = expandedDays.includes(date);
-                        const dayTotal = dailyApps.reduce((sum, app) => sum + app.total, 0);
+                        const dayTotal = apps.reduce((sum, app) => sum + app.total, 0);
                         return (
                             <div key={date} className="overflow-hidden bg-gray-900 border border-gray-800 rounded-xl transition-all">
-                                {/* FOLDER HEADER (ARCHIVOS DESPLEGABLES) */}
                                 <button 
                                     onClick={() => toggleDay(date)}
                                     className={`w-full p-4 flex items-center justify-between text-left transition-colors ${isExpanded ? 'bg-amber-500/10' : 'hover:bg-gray-800'}`}
@@ -954,7 +972,7 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
                                         </div>
                                         <div>
                                             <p className="text-white font-black text-sm">{date === today ? 'Hoy (Cerrado)' : date}</p>
-                                            <p className="text-xs text-gray-500 font-bold uppercase">{dailyApps.length} Servicios realizados</p>
+                                            <p className="text-xs text-gray-500 font-bold uppercase">{apps.length} Servicios realizados</p>
                                         </div>
                                     </div>
                                     <div className="text-right flex flex-col items-end">
@@ -963,10 +981,9 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
                                     </div>
                                 </button>
 
-                                {/* DESPLEGABLE CONTENT */}
                                 <div className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[2000px] opacity-100 p-4 border-t border-gray-800 bg-gray-950/30' : 'max-h-0 opacity-0 invisible p-0 overflow-hidden'}`}>
                                     <div className="space-y-3">
-                                        {dailyApps.map(app => (
+                                        {apps.map(app => (
                                             <div key={app.id} className="p-3 bg-gray-900/50 rounded-lg border border-gray-800/50 flex justify-between items-center group">
                                                 <div>
                                                     <div className="flex items-center gap-2">
@@ -1000,7 +1017,7 @@ const AgendaPage: React.FC<{ appointments: Appointment[]; onCancel: (appointment
     );
 };
 
-const ProfilePage: React.FC<{ profile: UserProfile; onUpdate: (p: UserProfile) => void; isAdmin: boolean; onToggleAdmin: () => void; }> = ({ profile, onUpdate, isAdmin, onToggleAdmin }) => {
+const ProfilePage: React.FC<{ profile: UserProfile; onUpdate: (p: UserProfile) => void; isAdmin: boolean; onToggleAdmin: () => void; onManualSave: () => void }> = ({ profile, onUpdate, isAdmin, onToggleAdmin, onManualSave }) => {
     const [localProfile, setLocalProfile] = useState(profile);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -1010,7 +1027,7 @@ const ProfilePage: React.FC<{ profile: UserProfile; onUpdate: (p: UserProfile) =
     };
 
     return (
-        <section id="page-perfil" className="p-4 hidden fade-in">
+        <section id="page-perfil" className="p-4 fade-in">
             <h2 className="section-title text-2xl font-bold text-white mb-6">Perfil</h2>
             <div className="bg-gray-800 p-6 rounded-xl border border-gray-700">
                 <form onSubmit={handleSave} className="space-y-4">
@@ -1033,16 +1050,31 @@ const ProfilePage: React.FC<{ profile: UserProfile; onUpdate: (p: UserProfile) =
                         <label className="block text-xs font-black text-amber-400 uppercase mb-1">Dirección de Envío</label>
                         <input value={localProfile.address || ''} onChange={e => setLocalProfile({...localProfile, address: e.target.value})} className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:ring-amber-500 outline-none" placeholder="Tu dirección para domicilios" />
                     </div>
-                    <button type="submit" className="w-full bg-amber-500 text-gray-900 py-3 rounded-xl font-black uppercase tracking-widest mt-4">Guardar Cambios</button>
+                    <button type="submit" className="w-full bg-amber-500 text-gray-900 py-3 rounded-xl font-black uppercase tracking-widest mt-4">Actualizar Perfil</button>
                 </form>
-                <div className="mt-8 border-t border-gray-700 pt-4 flex justify-between items-center">
+
+                <div className="mt-8 pt-6 border-t border-gray-700 space-y-6">
                     <div>
-                        <span className="text-sm font-bold block">Modo Administrador</span>
-                        <span className="text-[10px] text-gray-500">Solo para dueños de barbería</span>
+                        <h3 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3">Backup de Datos</h3>
+                        <button 
+                            onClick={onManualSave}
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg"
+                        >
+                            <i className="fas fa-cloud-upload-alt text-xl"></i>
+                            Guardar Información Diaria
+                        </button>
+                        <p className="text-[10px] text-gray-500 text-center mt-2 italic">Esto sincronizará tus cambios actuales en el almacenamiento local seguro del dispositivo.</p>
                     </div>
-                    <button onClick={onToggleAdmin} className={`w-14 h-7 rounded-full transition-colors ${isAdmin ? 'bg-red-600' : 'bg-gray-600'} relative p-1`}>
-                        <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all ${isAdmin ? 'right-1' : 'left-1'}`} />
-                    </button>
+
+                    <div className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-700">
+                        <div>
+                            <span className="text-sm font-bold block text-white">Modo Administrador</span>
+                            <span className="text-[10px] text-gray-500">Solo para dueños de barbería</span>
+                        </div>
+                        <button onClick={onToggleAdmin} className={`w-14 h-7 rounded-full transition-colors ${isAdmin ? 'bg-red-600' : 'bg-gray-600'} relative p-1`}>
+                            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all ${isAdmin ? 'right-1' : 'left-1'}`} />
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1050,27 +1082,63 @@ const ProfilePage: React.FC<{ profile: UserProfile; onUpdate: (p: UserProfile) =
 };
 
 const App: React.FC = () => {
+    // Initial state loading from localStorage or constants
+    const [appointments, setAppointments] = useState<Appointment[]>(() => loadLocalData(SAVE_KEYS.APPOINTMENTS, []));
+    const [services, setServices] = useState<Service[]>(() => loadLocalData(SAVE_KEYS.SERVICES, ALL_SERVICES));
+    const [barbers, setBarbers] = useState<Barber[]>(() => loadLocalData(SAVE_KEYS.BARBERS, MOCK_BARBERS));
+    const [products, setProducts] = useState<Product[]>(() => loadLocalData(SAVE_KEYS.PRODUCTS, MOCK_PRODUCTS));
+    const [cart, setCart] = useState<CartItem[]>(() => loadLocalData(SAVE_KEYS.CART, []));
+    const [isAdmin, setIsAdmin] = useState<boolean>(() => loadLocalData(SAVE_KEYS.ADMIN_MODE, false));
+    const [userProfile, setUserProfile] = useState<UserProfile>(() => loadLocalData(SAVE_KEYS.PROFILE, {
+        name: 'Usuario Demo', email: 'usuario@ejemplo.com', phone: '3001234567', bio: '', pic: null, address: 'Carrera 7 # 100-20, Bogotá'
+    }));
+
     const [currentPage, setCurrentPage] = useState<Page>('inicio');
     const [selectedServices, setSelectedServices] = useState<Service[]>([]);
     const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
     const [modalState, setModalState] = useState<ModalState>({ type: 'none' });
     const [showNotifications, setShowNotifications] = useState(false);
     const [pushPermission, setPushPermission] = useState(Notification.permission);
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
-    const [services, setServices] = useState<Service[]>(ALL_SERVICES);
-    const [barbers, setBarbers] = useState<Barber[]>(MOCK_BARBERS);
-    const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
-    const [cart, setCart] = useState<CartItem[]>([]);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [userProfile, setUserProfile] = useState<UserProfile>({
-        name: 'Usuario Demo', email: 'usuario@ejemplo.com', phone: '3001234567', bio: '', pic: null, address: 'Carrera 7 # 100-20, Bogotá'
-    });
     
+    // Toast Notification State
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
+
     const [availabilityFilter, setAvailabilityFilter] = useState(false);
     const [specialtyFilter, setSpecialtyFilter] = useState('all');
     const [levelFilter, setLevelFilter] = useState('all');
     const [radiusFilter, setRadiusFilter] = useState('all');
     const [userLocation, setUserLocation] = useState<{ lat: number, lng: number } | null>(null);
+
+    // AUTO-SAVE EFFECTS
+    useEffect(() => { saveLocalData(SAVE_KEYS.APPOINTMENTS, appointments); }, [appointments]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.SERVICES, services); }, [services]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.BARBERS, barbers); }, [barbers]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.PRODUCTS, products); }, [products]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.CART, cart); }, [cart]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.PROFILE, userProfile); }, [userProfile]);
+    useEffect(() => { saveLocalData(SAVE_KEYS.ADMIN_MODE, isAdmin); }, [isAdmin]);
+
+    const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    }, []);
+
+    const handleManualSave = () => {
+        saveLocalData(SAVE_KEYS.APPOINTMENTS, appointments);
+        saveLocalData(SAVE_KEYS.SERVICES, services);
+        saveLocalData(SAVE_KEYS.BARBERS, barbers);
+        saveLocalData(SAVE_KEYS.PRODUCTS, products);
+        saveLocalData(SAVE_KEYS.CART, cart);
+        saveLocalData(SAVE_KEYS.PROFILE, userProfile);
+        saveLocalData(SAVE_KEYS.ADMIN_MODE, isAdmin);
+        
+        showToast('Backup completado con éxito', 'info');
+        setModalState({ 
+            type: 'message', 
+            title: '✨ Información Respaldada', 
+            message: 'Toda tu información (citas, productos y perfil) ha sido guardada exitosamente en este dispositivo.' 
+        });
+    };
 
     const refreshLocation = useCallback(() => {
         if ("geolocation" in navigator) {
@@ -1097,6 +1165,7 @@ const App: React.FC = () => {
             }
             return [...prev, { ...product, quantity: 1 }];
         });
+        showToast(`${product.name} añadido`, 'success');
         triggerSWNotification('🛒 Carrito Actualizado', `${product.name} añadido.`);
     };
 
@@ -1195,7 +1264,7 @@ const App: React.FC = () => {
         setSelectedServices([]);
         setSelectedBarber(null);
         setModalState({ type: 'none' });
-        setModalState({ type: 'message', title: '¡Listo!', message: 'Tu cita ha sido agendada con éxito.' });
+        showToast('Cita confirmada con éxito', 'success');
         triggerSWNotification('📅 Cita Confirmada', `Cita con ${selectedBarber.name} el ${date}.`);
         setCurrentPage('agenda');
     };
@@ -1205,8 +1274,9 @@ const App: React.FC = () => {
         const closeModal = () => setModalState({ type: 'none' });
 
         if (modalState.type === 'checkout' && modalState.item) {
-            // Fix: Cast modalState.item to any to allow property access on union type that might be resolved as unknown
-            const { total, cart: cartItems } = modalState.item as any;
+            const checkoutData = modalState.item as { total: number; cart: CartItem[] };
+            const total = checkoutData.total;
+            const cartItems = checkoutData.cart;
             return (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-md">
                     <div className="bg-gray-900 w-full max-w-lg rounded-2xl border border-amber-500 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -1224,40 +1294,41 @@ const App: React.FC = () => {
                                             <span className="font-bold">{formatCurrency(item.price * item.quantity)}</span>
                                         </div>
                                     ))}
-                                    <div className="border-t border-gray-800 pt-2 flex justify-between text-white font-black">
+                                    <div className="border-t border-gray-700 pt-2 flex justify-between text-white font-black">
                                         <span>TOTAL A PAGAR</span>
                                         <span className="text-amber-400 text-lg">{formatCurrency(total)}</span>
                                     </div>
                                 </div>
                             </section>
-
-                            <section>
-                                <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3">Dirección de Envío</h4>
-                                <input defaultValue={userProfile.address} className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:ring-amber-500 outline-none" placeholder="Tu dirección exacta" />
-                            </section>
-
                             <section>
                                 <h4 className="text-xs font-black text-amber-400 uppercase tracking-widest mb-3">Método de Pago</h4>
                                 <div className="grid grid-cols-1 gap-3">
-                                    <button onClick={() => setModalState({ type: 'message', title: 'Nequi', message: 'Transfiere a la línea 3001234567 y adjunta el soporte vía WhatsApp para procesar tu envío.' })} className="flex items-center gap-4 p-4 bg-purple-900/40 border border-purple-500 rounded-xl hover:bg-purple-900/60 transition">
+                                    <button onClick={() => setModalState({ type: 'message', title: 'Pago con Tarjeta', message: 'Serás redirigido a la pasarela de pagos segura (Visa/Mastercard/AMEX) para completar la transacción.' })} className="flex items-center gap-4 p-4 bg-blue-900/40 border border-blue-500 rounded-xl hover:bg-blue-900/60 transition group">
+                                        <div className="h-10 w-10 bg-blue-600 rounded-lg flex items-center justify-center text-white"><i className="fas fa-credit-card"></i></div>
+                                        <div className="text-left">
+                                            <p className="font-bold text-white">Tarjeta de Crédito / Débito</p>
+                                            <p className="text-[10px] text-blue-300">Visa, Mastercard, AMEX</p>
+                                        </div>
+                                    </button>
+                                    <button onClick={() => setModalState({ type: 'message', title: 'Transferencia Nequi', message: 'Transfiere a la línea 3001234567 y adjunta el soporte vía WhatsApp para procesar tu envío.' })} className="flex items-center gap-4 p-4 bg-purple-900/40 border border-purple-500 rounded-xl hover:bg-purple-900/60 transition">
                                         <div className="h-10 w-10 bg-[#e0196d] rounded-lg flex items-center justify-center font-black italic text-white">N</div>
                                         <div className="text-left">
                                             <p className="font-bold text-white">Nequi</p>
                                             <p className="text-[10px] text-purple-300">Transferencia inmediata</p>
                                         </div>
                                     </button>
-                                    <button onClick={() => setModalState({ type: 'message', title: 'Bancolombia', message: 'Cuenta de Ahorros: 123-456789-01. Envía el comprobante para despachar.' })} className="flex items-center gap-4 p-4 bg-blue-900/40 border border-blue-500 rounded-xl hover:bg-blue-900/60 transition">
+                                    <button onClick={() => setModalState({ type: 'message', title: 'Transferencia Bancolombia', message: 'Cuenta de Ahorros: 123-456789-01. Envía el comprobante para despachar.' })} className="flex items-center gap-4 p-4 bg-blue-900/40 border border-blue-500 rounded-xl hover:bg-blue-900/60 transition">
                                         <div className="h-10 w-10 bg-[#fdcb00] rounded-lg flex items-center justify-center font-black italic text-[#000000]">B</div>
                                         <div className="text-left">
                                             <p className="font-bold text-white">Bancolombia</p>
                                             <p className="text-[10px] text-blue-300">Ahorros / A la mano</p>
                                         </div>
                                     </button>
-                                    <button onClick={() => { setCart([]); setModalState({ type: 'message', title: 'Pedido Confirmado', message: 'Tu pedido será entregado en la dirección proporcionada. Pagas al recibir.' }); }} className="flex items-center gap-4 p-4 bg-green-900/40 border border-green-500 rounded-xl hover:bg-green-900/60 transition">
+                                    <button onClick={() => { setCart([]); showToast('Pedido realizado', 'success'); setModalState({ type: 'message', title: 'Pedido Confirmado', message: 'Tu pedido será entregado en la dirección proporcionada. Pagas al recibir.' }); }} className="flex items-center gap-4 p-4 bg-green-900/40 border border-green-500 rounded-xl hover:bg-green-900/60 transition">
                                         <div className="h-10 w-10 bg-green-600 rounded-lg flex items-center justify-center text-white"><i className="fas fa-truck"></i></div>
                                         <div className="text-left">
-                                            <p className="font-bold text-white">Pago a Domicilio</p>
-                                            <p className="text-[10px] text-green-300">Pago contra entrega (Efectivo)</p>
+                                            <p className="font-bold text-white">Pago Contra Entrega</p>
+                                            <p className="text-[10px] text-green-300">Efectivo al recibir</p>
                                         </div>
                                     </button>
                                 </div>
@@ -1273,9 +1344,8 @@ const App: React.FC = () => {
             const today = new Date().toISOString().split('T')[0];
             return (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-gray-900 p-6 rounded-xl border border-amber-500 shadow-2xl max-w-sm w-full">
+                    <div className="bg-gray-900 p-6 rounded-xl border border-amber-500 shadow-2xl max-sm w-full">
                         <h3 className="text-xl font-bold text-white mb-4">Seleccionar Agenda</h3>
-                        <p className="text-gray-400 text-sm mb-4">Agendando con <strong>{barber.name}</strong></p>
                         <form onSubmit={(e) => {
                             e.preventDefault();
                             const formData = new FormData(e.currentTarget);
@@ -1289,7 +1359,6 @@ const App: React.FC = () => {
                                 <div>
                                     <label className="block text-xs text-amber-400 font-bold uppercase mb-1">Hora</label>
                                     <input name="time" type="time" required className="w-full bg-gray-800 border border-gray-700 rounded p-2 text-white" />
-                                    <p className="text-[10px] text-gray-500 mt-1">Horario: 08:00 AM - 08:00 PM</p>
                                 </div>
                             </div>
                             <div className="mt-6 flex space-x-3">
@@ -1315,36 +1384,6 @@ const App: React.FC = () => {
             );
         }
 
-        if (modalState.type === 'editItem' && modalState.item) {
-            // Fix: Cast item to any to allow property checks and value extraction on unknown union type
-            const item = modalState.item as any;
-            const isService = 'duration' in item;
-            const isProduct = 'brand' in item;
-            return (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-900 p-6 rounded-xl border border-blue-500 shadow-2xl max-w-md w-full">
-                        <h3 className="text-xl font-bold text-white mb-4">Editar {isService ? 'Servicio' : isProduct ? 'Producto' : 'Barbero'}</h3>
-                        <form onSubmit={(e) => {
-                            e.preventDefault();
-                            const formData = new FormData(e.currentTarget);
-                            const updated = { ...item, name: formData.get('name') };
-                            if (isService) (updated as any).price = Number(formData.get('price'));
-                            if (isProduct) (updated as any).price = Number(formData.get('price'));
-                            setModalState({ type: 'none' });
-                            setModalState({ type: 'message', title: 'Guardado', message: 'Los cambios se han guardado exitosamente.' });
-                        }}>
-                            <input name="name" defaultValue={item.name} className="w-full bg-gray-800 p-2 mb-4 rounded border border-gray-600 text-white" />
-                            {(isService || isProduct) && <input name="price" type="number" defaultValue={(item as any).price} className="w-full bg-gray-800 p-2 mb-4 rounded border border-gray-600 text-white" />}
-                            <div className="flex space-x-2">
-                                <button type="submit" className="flex-1 bg-blue-600 py-2 rounded font-bold">Guardar</button>
-                                <button type="button" onClick={closeModal} className="flex-1 bg-gray-700 py-2 rounded font-bold">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            );
-        }
-
         if (modalState.type === 'barberProfile' && modalState.item) {
             const barber = modalState.item as Barber;
             return (
@@ -1361,10 +1400,6 @@ const App: React.FC = () => {
                                     <div className="bg-gray-800 p-4 rounded-lg border border-amber-500/30">
                                         <p className="text-sm font-bold text-white mb-2">Servicios:</p>
                                         {selectedServices.map(s => <div key={s.id} className="text-xs text-gray-400 mb-1 flex justify-between"><span>{s.name}</span> <span>{formatCurrency(s.price)}</span></div>)}
-                                        <div className="border-t border-gray-700 mt-2 pt-2 text-amber-500 font-black flex justify-between">
-                                            <span>Total Estimado:</span>
-                                            <span>{formatCurrency(selectedServices.reduce((a,b)=>a+b.price,0))}</span>
-                                        </div>
                                         <button onClick={() => setModalState({ type: 'agenda', item: barber })} className="w-full mt-4 bg-amber-500 text-gray-900 py-3 rounded-xl font-black uppercase tracking-wider shadow-lg">Agendar Cita</button>
                                     </div>
                                 ) : (
@@ -1386,7 +1421,11 @@ const App: React.FC = () => {
                     <div className="bg-gray-900 p-6 rounded-xl border border-red-500 shadow-2xl max-sm w-full text-center">
                         <h3 className="text-xl font-bold text-white mb-6">¿Cancelar cita?</h3>
                         <div className="flex space-x-3">
-                            <button onClick={() => { setAppointments(appointments.filter(a => a.id !== modalState.item!.id)); closeModal(); }} className="flex-1 bg-red-600 py-2 rounded font-bold">Sí, Cancelar</button>
+                            <button onClick={() => { 
+                                setAppointments(appointments.filter(a => a.id !== (modalState.item as any).id)); 
+                                closeModal();
+                                showToast('Cita cancelada correctamente', 'error');
+                            }} className="flex-1 bg-red-600 py-2 rounded font-bold">Sí, Cancelar</button>
                             <button onClick={closeModal} className="flex-1 bg-gray-700 py-2 rounded">No</button>
                         </div>
                     </div>
@@ -1401,13 +1440,30 @@ const App: React.FC = () => {
         <div className="flex flex-col h-full bg-gray-950 text-gray-200 font-sans">
             <Header userProfilePic={userProfile.pic} onProfileClick={() => handlePageChange('perfil')} hasUnread={MOCK_NOTIFICATIONS.length > 0} onNotificationClick={() => setShowNotifications(!showNotifications)} isAdmin={isAdmin} />
             {showNotifications && <NotificationsPanel notifications={MOCK_NOTIFICATIONS} onClose={() => setShowNotifications(false)} onEnablePush={handleEnablePush} pushEnabled={pushPermission === 'granted'} />}
+            
+            {/* Toast System */}
+            {toast && (
+                <div className={`fixed top-20 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-xl shadow-2xl border-l-4 flex items-center gap-3 animate-fade-in-down transition-all ${
+                    toast.type === 'success' ? 'bg-green-900/95 border-green-500 text-green-100' : 
+                    toast.type === 'error' ? 'bg-red-900/95 border-red-500 text-red-100' : 
+                    'bg-blue-900/95 border-blue-500 text-blue-100'
+                }`}>
+                    <i className={`fas ${
+                        toast.type === 'success' ? 'fa-check-circle text-green-400' : 
+                        toast.type === 'error' ? 'fa-trash-alt text-red-400' : 
+                        'fa-info-circle text-blue-400'
+                    }`}></i>
+                    <span className="font-bold text-sm tracking-tight">{toast.message}</span>
+                </div>
+            )}
+
             <main className="flex-1 overflow-y-auto pb-20 relative scroll-smooth">
                 {currentPage === 'inicio' && <HomePage products={products} onPageChange={handlePageChange} setModal={setModalState} isAdmin={isAdmin} addToCart={addToCart} />}
                 {currentPage === 'servicios' && <ServicesPage availableServices={services} selectedServices={selectedServices} toggleService={toggleService} onPageChange={handlePageChange} setModal={setModalState} applyLLMRecommendation={(ids) => setSelectedServices(services.filter(s => ids.includes(s.id)))} isAdmin={isAdmin} onDeleteService={(id) => setServices(services.filter(s => s.id !== id))} />}
                 {currentPage === 'barberos' && <BarbersPage barbers={filteredBarbers} onSelectBarber={(b) => { setSelectedBarber(b); setModalState({ type: 'barberProfile', item: b }); }} selectedBarber={selectedBarber} availabilityFilter={availabilityFilter} onAvailabilityChange={setAvailabilityFilter} specialtyFilter={specialtyFilter} onSpecialtyChange={setSpecialtyFilter} levelFilter={levelFilter} onLevelChange={setLevelFilter} radiusFilter={radiusFilter} onRadiusChange={setRadiusFilter} userLocation={userLocation} onRefreshLocation={refreshLocation} allSpecialties={['all', ...new Set(barbers.map(b => b.specialty))]} allLevels={['all', ...new Set(barbers.map(b => b.professionLevel))]} isAdmin={isAdmin} setModal={setModalState} />}
                 {currentPage === 'comercio' && <CommercePage products={products} setModal={setModalState} isAdmin={isAdmin} onDeleteProduct={(id) => setProducts(products.filter(p => p.id !== id))} cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} updateCartQuantity={updateCartQuantity} />}
                 {currentPage === 'agenda' && <AgendaPage appointments={appointments} onCancel={(app) => setModalState({type: 'confirmCancel', item: app})} onEdit={(app) => setModalState({type: 'agenda', item: barbers.find(b=>b.id===app.barberId)})} isAdmin={isAdmin} />}
-                {currentPage === 'perfil' && <ProfilePage profile={userProfile} onUpdate={setUserProfile} isAdmin={isAdmin} onToggleAdmin={() => setIsAdmin(!isAdmin)} />}
+                {currentPage === 'perfil' && <ProfilePage profile={userProfile} onUpdate={setUserProfile} isAdmin={isAdmin} onToggleAdmin={() => setIsAdmin(!isAdmin)} onManualSave={handleManualSave} />}
             </main>
             <BottomNav currentPage={currentPage} onPageChange={handlePageChange} />
             {renderModalContent()}
