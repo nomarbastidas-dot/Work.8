@@ -21,22 +21,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #020617; /* slate-950 */
-        }
-        .section-title {
-            position: relative;
-            display: inline-block;
-            padding-bottom: 0.5rem;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
-        }
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 50%;
-            height: 3px;
-            background-color: #f59e0b; /* Amber 500 */
-            border-radius: 9999px;
+            color-scheme: dark;
         }
         .fade-in {
             animation: fadeIn 0.5s ease-out;
@@ -45,65 +30,168 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
+        
+        /* Custom Glowing Circular Button */
+        @keyframes glow-pulse {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+                border-color: rgba(245, 158, 11, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+                border-color: rgba(245, 158, 11, 1);
+            }
         }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translate(-50%, 20px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
+        .animate-glow-pulse {
+            animation: glow-pulse 2s infinite ease-in-out;
         }
-        .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
+
+        /* Generic Selection Glow Animation - Gold Pulse */
+        @keyframes goldPulse {
+            0%, 100% { 
+                border-color: rgba(245, 158, 11, 0.2); 
+                box-shadow: 0 0 12px rgba(245, 158, 11, 0.1);
+            }
+            50% { 
+                border-color: rgba(245, 158, 11, 0.8); 
+                box-shadow: 0 0 24px rgba(245, 158, 11, 0.4);
+            }
         }
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        /* Fluorescent Blue Flash Animation */
+        @keyframes blue-flash {
+            0% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 1);
+                border-color: rgba(59, 130, 246, 1);
+            }
+            20% {
+                box-shadow: 0 0 120px 60px rgba(59, 130, 246, 0.6);
+            }
+            100% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
         }
-        .animate-fade-in-down {
-            animation: fadeInDown 0.3s ease-out forwards;
+        .animate-blue-flash {
+            animation: blue-flash 1.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        @keyframes explosion-scale {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-explosion {
+            animation: explosion-scale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .item-selected-glow {
+            animation: goldPulse 3s infinite ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Product Card General Styles */
+        .product-card {
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+            position: relative;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 2rem;
+        }
+        .product-card:hover {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(245, 158, 11, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Refined Selector: .product-card img */
+        .product-card img {
+            object-fit: cover !important;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+            border: 2px solid rgba(245, 158, 11, 0.2);
+            border-radius: 1.5rem;
+            animation: goldPulse 4s infinite ease-in-out;
+            will-change: transform, border-color, box-shadow;
+        }
+        
+        .product-card:hover img {
+            transform: scale(1.06); /* Subtle scale effect */
+            border-color: rgba(245, 158, 11, 1); /* Full gold on hover */
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+            animation-play-state: paused; /* Focus on the hovered state */
+        }
+
+        /* Add to Cart Button Animation */
+        @keyframes btn-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 20px 10px rgba(245, 158, 11, 0); }
+        }
+
+        .add-to-cart-btn {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        .add-to-cart-btn:hover {
+            transform: scale(1.05);
+            background-color: #ffffff;
+            color: #000000;
+            animation: btn-pulse 1.5s infinite ease-in-out;
+        }
+        .add-to-cart-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Service Card Styles & Animations */
+        .service-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .service-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(245, 158, 11, 0.4);
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 158, 11, 0.1);
+        }
+        .service-icon-container {
+            transition: all 0.4s ease;
+            transform-origin: center;
+        }
+        .service-card:hover .service-icon-container {
+            transform: rotate(10deg) scale(1.2);
+            background: rgba(245, 158, 11, 0.2);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
+        }
+        .service-icon-container ion-icon {
+            transition: color 0.3s ease;
+        }
+        .service-card:hover .service-icon-container ion-icon {
+            color: #fcd34d; /* amber-300 */
+        }
+
+        /* Carousel helpers */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
         /* Map Custom Styles */
         .leaflet-container {
             background: #0f172a;
-            border-radius: 0.5rem;
-        }
-        .custom-div-icon {
-            background: transparent;
-            border: none;
+            border-radius: 2.5rem;
         }
         .barber-marker {
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            transition: transform 0.2s ease-in-out;
-        }
-        .barber-marker:hover {
-            transform: scale(1.2);
-            z-index: 1000 !important;
-        }
-        .barber-marker-pulse {
-            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-        }
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
-            70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-        }
-
-        /* Leaflet Tooltip Customization */
-        .custom-leaflet-tooltip {
-            background-color: rgba(17, 24, 39, 0.95) !important;
-            border: 1px solid #f59e0b !important;
-            color: #f3f4f6 !important;
-            border-radius: 0.5rem !important;
-            padding: 0 !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
-        }
-        .custom-leaflet-tooltip::before {
-            border-top-color: #f59e0b !important;
+            transition: all 0.3s ease;
         }
     </style>
 <script type="importmap">
@@ -117,7 +205,7 @@
 }
 </script>
 </head>
-<body class="bg-gray-950 text-gray-200 h-screen flex flex-col">
+<body class="bg-gray-950 text-gray-200 h-screen flex flex-col overflow-hidden">
     <div id="root" class="flex flex-col flex-1 h-full"></div>
     <script type="module" src="/index.tsx"></script>
 </body>

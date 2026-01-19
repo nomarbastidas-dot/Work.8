@@ -1,4 +1,7 @@
 
+import React from 'react';
+
+// Fix: Use declare global to augment the JSX namespace for custom elements like 'ion-icon'.
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -18,7 +21,7 @@ export interface Location {
 export interface Review {
   id: string;
   userName: string;
-  rating: number; // 1 to 5
+  rating: number;
   comment: string;
   date: string;
 }
@@ -32,11 +35,12 @@ export interface Barber {
   bio: string;
   location: Location;
   profilePicUrl: string;
-  gallery: string[];
+  gallery: { id: string; url: string; title: string }[];
   professionLevel: 'Maestro Barbero' | 'Barbero Artista' | 'Estilista Senior';
   rating: number;
   reviewCount: number;
   reviews: Review[];
+  themeColor: string; // Personalized palette
 }
 
 export interface Product {
@@ -44,6 +48,7 @@ export interface Product {
   name: string;
   brand: string;
   reference: string;
+  description?: string;
   price: number;
   imageUrl: string;
   sellerId: string;
@@ -60,6 +65,7 @@ export interface Service {
   price: number;
   duration: number;
   barberType: string;
+  icon?: string;
 }
 
 export interface AppointmentService {
@@ -81,6 +87,10 @@ export interface Appointment {
   endTime: string;
   createdAt?: { seconds: number };
   status: 'pending_payment' | 'confirmed' | 'cancelled';
+  remindersSent?: {
+    oneDay?: boolean;
+    oneHour?: boolean;
+  };
 }
 
 export interface StyleRecommendation {
@@ -89,14 +99,6 @@ export interface StyleRecommendation {
   explanation: string;
   imageUrls?: string[];
   webSources?: { title: string; uri: string }[];
-}
-
-export interface AppNotification {
-  id: string;
-  type: 'appointment' | 'promo';
-  title: string;
-  message: string;
-  timestamp: string;
 }
 
 export interface UserProfile {
@@ -108,13 +110,27 @@ export interface UserProfile {
   pic: string | null;
 }
 
-export type Page = 'inicio' | 'servicios' | 'barberos' | 'comercio' | 'agenda' | 'perfil';
+export interface FeaturedWork {
+  id: string;
+  imageUrl: string;
+  label: string;
+}
 
-export type ModalType = 'loading' | 'message' | 'barberProfile' | 'agenda' | 'payment' | 'confirmCancel' | 'editAppointment' | 'editItem' | 'checkout' | 'none';
+export interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  timestamp: string;
+}
+
+export type Page = 'inicio' | 'servicios' | 'barberos' | 'agenda' | 'comercio' | 'perfil';
+
+export type ModalType = 'editItem' | 'editFeaturedWork' | 'addBarber' | 'editBarber' | 'viewBarber' | 'viewProduct' | 'styleAI' | 'message' | 'bookAppointment' | 'checkout' | 'purchaseSuccess' | 'none';
 
 export interface ModalState {
   type: ModalType;
   title?: string;
   message?: string;
-  item?: Appointment | Product | Barber | Service | any;
+  item?: any;
 }

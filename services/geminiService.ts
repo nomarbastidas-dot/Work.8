@@ -1,14 +1,13 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { Service, StyleRecommendation } from '../types';
-
-// Use process.env.API_KEY directly as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getStyleRecommendation = async (
   styleInput: string,
   allServices: Service[]
 ): Promise<StyleRecommendation> => {
+  // Always create a new GoogleGenAI instance right before making an API call to ensure it uses the most up-to-date API key.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  
   const serviceListString = JSON.stringify(allServices.map(s => ({ 
       id: s.id, 
       name: s.name, 
@@ -98,6 +97,9 @@ export const generateProductDescription = async (
     productName: string,
     productDesc: string
 ): Promise<string> => {
+    // Always create a new GoogleGenAI instance right before making an API call to ensure it uses the most up-to-date API key.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
     const systemPrompt = "Eres un redactor experto en marketing de productos de barbería. Tu objetivo es crear descripciones de alta conversión, enfatizando los beneficios y la calidad. Responde ÚNICAMENTE con la descripción generada. Debe ser concisa (máximo 4 oraciones) y persuasiva.";
     
     const userQuery = `Genera una descripción de venta de alta conversión para este producto: Nombre: "${productName}". Descripción básica: "${productDesc}".`;
